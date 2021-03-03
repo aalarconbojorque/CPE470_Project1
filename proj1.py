@@ -6,7 +6,8 @@
 # MODIFICATION HISTORY:
 # Author             Date           Modification(s)
 # ----------------   -----------    ---------------
-# Andy Alarcon
+# Andy Alarcon       03-02-2021     1.0 ... setup dev environment, imported NumPy
+# Andy Alarcon       03-03-2021     1.1 ... implemented KFreading class & additional matrices
 # -----------------------------------------------------------------------------
 
 import numpy.matlib as m
@@ -15,19 +16,44 @@ import math
 
 
 def main():
-    testKF = KFReading(1,-1.9512e-65,0,0.001225,8.82147e-199,2.96439e-322,-1.89933e-65,0,0,0)
-    print(testKF.matrix_A)
-    print(testKF.matrix_initalX)
-    print(np.dot(testKF.matrix_A, testKF.matrix_initalX))
-    print("\n\n")
-    print(testKF.matrix_QNoise)
-    print(testKF.matrix_TransA)
     
+    #Data set read from file
+    KFReadings = ReadCommandsFileInput()
+
+    print(KFReadings[35].time)
+
+# ----------------------------------------------------------------------------
+# FUNCTION NAME:     ReadFileInput()
+# PURPOSE:           This function reads the data file input and returns a list of 
+#                    the data at each time
+# -----------------------------------------------------------------------------
+
+
+def ReadCommandsFileInput():
+    KFFileReadings = []
+
+    # Read the lines from the file
+    file1 = open('EKF_DATA_circle.txt', 'r')
+    Lines = file1.readlines()[1:]
+ 
+    # Strips each newline character and create a KF object
+    for line in Lines:           
+        line = line.strip()
+        x = line.split(",")
+        newReading = KFReading(float(x[0]), float(x[1]), float(x[2]), float(x[3]), float(x[4]), float(x[5]), 
+        float(x[6]), float(x[7]), float(x[8]), float(x[9]))
+        KFFileReadings.append(newReading)
+     
+   
+    file1.close()  
+
+    return KFFileReadings
     
 
 class KFReading:
     def __init__(self, time, odo_x, odo_y, odo_o, imu_o, imu_cov, gps_x, gps_y, gps_covX, gps_covY):
         self.time = time
+        self.delta_time = 0.001
         self.odo_x = odo_x
         self.odo_y = odo_y
         self.odo_o = odo_o
@@ -49,10 +75,10 @@ class KFReading:
         #Create Matrix A
         cos_theta = np.around(np.cos(self.odo_o), decimals=5)
         sin_theta = np.around(np.sin(self.odo_o), decimals=5)
-        A_mat = m.matrix([[1, 0, self.time*cos_theta, 0, 0],
-                            [0, 1, self.time*sin_theta, 0, 0],
+        A_mat = m.matrix([[1, 0, self.delta_time*cos_theta, 0, 0],
+                            [0, 1, self.delta_time*sin_theta, 0, 0],
                             [0, 0, 1, 0, 0],
-                            [0, 0, 0, 1, self.time],
+                            [0, 0, 0, 1, self.delta_time],
                             [0, 0, 0, 0, 1]])
         self.matrix_A = A_mat
 
