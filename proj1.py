@@ -60,8 +60,8 @@ class KFReading:
         #Create inital Xstate matrx
         self.velocity = 0.44
         tan_theta = np.around(np.tan(self.odo_o), decimals=5)
-        angularVelocity = self.velocity * (tan_theta / 1)
-        X_mat = m.matrix([[self.odo_x], [self.odo_y], [self.velocity], [self.odo_o], [angularVelocity]])
+        self.wvelocity = self.velocity * (tan_theta / 1)
+        X_mat = m.matrix([[self.odo_x], [self.odo_y], [self.velocity], [self.odo_o], [self.wvelocity]])
         self.matrix_initalX = X_mat
 
         #Predicted proccess equation
@@ -91,6 +91,28 @@ class KFReading:
         self.matrix_H = np.identity(5)
         self.matrix_TransH = np.transpose(self.matrix_H)
 
+        #Measurement Error covariance matrix R
+        R_mat = m.matrix([[self.gps_covX, 0, 0, 0, 0],
+                            [0, self.gps_covY, 0, 0, 0],
+                            [0, 0, .01, 0, 0],
+                            [0, 0, 0, self.imu_cov, 0],
+                            [0, 0, 0, 0, .01]])
+        self.matrix_R = R_mat
+
+        #Inital measurement error covariance matrix R
+        IR_mat = m.matrix([[.04, 0, 0, 0, 0],
+                            [0, .04, 0, 0, 0],
+                            [0, 0, .01, 0, 0],
+                            [0, 0, 0, .01, 0],
+                            [0, 0, 0, 0, .01]])
+        self.matrix_initalR = IR_mat
+
+        #Correction Stage
+        #--------------------------------------------------------------------------------------------
+        
+        #Sensor measurements        
+        Z_mat = m.matrix([[self.gps_x], [self.gps_covY], [self.velocity], [self.imu_o], [self.wvelocity]])
+        self.matrix_Z = Z_mat
 
 
 
