@@ -18,9 +18,44 @@ import math
 def main():
     
     #Data set read from file
-    KFReadings = ReadCommandsFileInput()
+    #KFReadings = ReadCommandsFileInput()
+    testKF = KFReading(1,-1.9512e-65,0,0.001225,8.82147e-199,2.96439e-322,-1.89933e-65,0,0,0)
+    #print(testKF.matrix_PredP)
+    PredictionStage(testKF)
+    #print ("\n")
+    #print(testKF.matrix_PredP)
 
-    print(KFReadings[35].time)
+# ----------------------------------------------------------------------------
+# FUNCTION NAME:     PredictionStage()
+# PURPOSE:           This performs the prediction stage for one KFreading
+# -----------------------------------------------------------------------------
+
+
+def PredictionStage(KFreading):
+   
+   #Predict state
+   print("Matrix A : ") 
+   print(KFreading.matrix_A)
+   print("Inital Matrix X : ")
+   print(KFreading.matrix_initalX)
+   KFreading.matrix_PredX = np.dot(KFreading.matrix_A, KFreading.matrix_initalX)
+   print("Matrix A x X : ") 
+   print(KFreading.matrix_PredX)
+
+   #Predict proccess matrix
+   print("Inital Matrix P : ") 
+   print(KFreading.matrix_initalP)
+   leftS = np.dot(KFreading.matrix_A, KFreading.matrix_initalP)
+   print("Left Matrix : ") 
+   print(leftS)
+#    KFreading.matrix_PredP = np.add(leftS, KFreading.matrix_QNoise)
+#    print("Noise Matrix : ") 
+#    print(KFreading.matrix_QNoise)
+#    print("leftS + Noise : ")
+#    print(KFreading.matrix_PredP)
+   
+
+   
 
 # ----------------------------------------------------------------------------
 # FUNCTION NAME:     ReadFileInput()
@@ -73,8 +108,10 @@ class KFReading:
         #Predicted state equation
         #----------------------------------------------------------------------------------------------
         #Create Matrix A
-        cos_theta = np.around(np.cos(self.odo_o), decimals=5)
-        sin_theta = np.around(np.sin(self.odo_o), decimals=5)
+        #cos_theta = np.around(np.cos(self.odo_o), decimals=5)
+        #sin_theta = np.around(np.sin(self.odo_o), decimals=5)
+        cos_theta = np.cos(self.odo_o)
+        sin_theta = np.sin(self.odo_o)
         A_mat = m.matrix([[1, 0, self.delta_time*cos_theta, 0, 0],
                             [0, 1, self.delta_time*sin_theta, 0, 0],
                             [0, 0, 1, 0, 0],
