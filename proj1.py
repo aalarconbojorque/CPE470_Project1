@@ -22,8 +22,8 @@ def main():
     testKF = KFReading(1,-1.9512e-65,0,0.001225,8.82147e-199,2.96439e-322,-1.89933e-65,0,0,0)
     #print(testKF.matrix_PredP)
     PredictionStage(testKF)
-    #print ("\n")
-    #print(testKF.matrix_PredP)
+    print ("\n")
+    print(testKF.matrix_PredP)
 
 # ----------------------------------------------------------------------------
 # FUNCTION NAME:     PredictionStage()
@@ -34,25 +34,26 @@ def main():
 def PredictionStage(KFreading):
    
    #Predict state
-   print("Matrix A : ") 
-   print(KFreading.matrix_A)
-   print("Inital Matrix X : ")
-   print(KFreading.matrix_initalX)
+#    print("Matrix A : ") 
+#    print(KFreading.matrix_A)
+#    print("Inital Matrix X : ")
+#    print(KFreading.matrix_initalX)
    KFreading.matrix_PredX = np.dot(KFreading.matrix_A, KFreading.matrix_initalX)
-   print("Matrix A x X : ") 
-   print(KFreading.matrix_PredX)
+#    print("Matrix A x X : ") 
+#    print(KFreading.matrix_PredX)
 
    #Predict proccess matrix
-   print("Inital Matrix P : ") 
-   print(KFreading.matrix_initalP)
+#    print("Inital Matrix P : ") 
+#    print(KFreading.matrix_initalP)
    leftS = np.dot(KFreading.matrix_A, KFreading.matrix_initalP)
-   print("Left Matrix : ") 
-   print(leftS)
-#    KFreading.matrix_PredP = np.add(leftS, KFreading.matrix_QNoise)
+   leftS = np.dot(leftS, KFreading.matrix_TransA)
+#    print("Left Matrix : ") 
+#    print(leftS)
+   KFreading.matrix_PredP = np.add(leftS, KFreading.matrix_QNoise)
 #    print("Noise Matrix : ") 
 #    print(KFreading.matrix_QNoise)
-#    print("leftS + Noise : ")
-#    print(KFreading.matrix_PredP)
+   print("Prediction P matrix : ")
+   print(KFreading.matrix_PredP)
    
 
    
