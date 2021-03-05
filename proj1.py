@@ -16,6 +16,7 @@ import numpy.matlib as m
 import numpy as np
 import math
 import matplotlib.pyplot as plt 
+import random
 
 
 def main():
@@ -53,7 +54,7 @@ def main():
         #print("-----------------------------------------------------------")
 
     
-
+    print("Data Written to Output.txt")
 
 	    
 
@@ -278,6 +279,13 @@ class KFReading:
         # --------------------------------------------------------------------------------------------
         self.matrix_H = np.identity(5)
         self.matrix_TransH = np.transpose(self.matrix_H)
+        
+        print(random.uniform(0.001, 0.009))
+        
+        if (self.time >= 500 and self.time <=2000) or (self.time >= 3000):
+            offset = random.uniform(-2,2)
+        else :
+            offset = 0
 
         # Measurement Error covariance matrix R
         R_mat = m.matrix([[self.gps_covX, 0, 0, 0, 0],
@@ -299,7 +307,7 @@ class KFReading:
         # --------------------------------------------------------------------------------------------
 
         # Sensor measurements
-        Z_mat = m.matrix([[self.gps_x], [self.gps_y], [
+        Z_mat = m.matrix([[self.gps_x+offset], [self.gps_y+offset], [
                          self.velocity], [self.imu_o], [self.wvelocity]])
         self.matrix_Z = Z_mat
 
