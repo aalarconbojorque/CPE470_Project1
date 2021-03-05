@@ -8,11 +8,14 @@
 # ----------------   -----------    ---------------
 # Andy Alarcon       03-02-2021     1.0 ... setup dev environment, imported NumPy
 # Andy Alarcon       03-03-2021     1.1 ... implemented KFreading class & additional matrices
+# Andy Alarcon       03-04-2021     1.2 ... Added file input, output and equations for KF
+# Andy Alarcon       03-05-2021     1.3 ... Corred IMU calibration
 # -----------------------------------------------------------------------------
 
 import numpy.matlib as m
 import numpy as np
 import math
+import matplotlib.pyplot as plt 
 
 
 def main():
@@ -49,18 +52,12 @@ def main():
 
         #print("-----------------------------------------------------------")
 
-
+    
 
 
 	    
 
-    # # Calculate Xpred and Pred
-    # PredictionStage(testKF)
-    # # Calculate Kalaman Gain
-    # CalculateKalmanGain(testKF)
-    # CorrectionStage(testKF)
-
-    #Setup next
+    
 
  # ----------------------------------------------------------------------------
 # FUNCTION NAME:     WriteDataToFile()
@@ -219,7 +216,7 @@ class KFReading:
         self.odo_x = odo_x
         self.odo_y = odo_y
         self.odo_o = odo_o
-        self.imu_o = imu_o
+        self.imu_o = imu_o + (0.32981-0.237156)
         self.imu_cov = imu_cov
         self.gps_x = gps_x
         self.gps_y = gps_y
