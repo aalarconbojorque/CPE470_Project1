@@ -1,21 +1,22 @@
 # -----------------------------------------------------------------------------
-# FILE NAME:
-# USAGE:             python3
-# NOTES:             Run
+# FILE NAME:         proj1.py
+# USAGE:             python3 proj1.py
+# NOTES:             Requires NumPy installation
+#                    Requires Python3
 #
 # MODIFICATION HISTORY:
 # Author             Date           Modification(s)
 # ----------------   -----------    ---------------
 # Andy Alarcon       03-02-2021     1.0 ... setup dev environment, imported NumPy
 # Andy Alarcon       03-03-2021     1.1 ... implemented KFreading class & additional matrices
-# Andy Alarcon       03-04-2021     1.2 ... Added file input, output and equations for KF
-# Andy Alarcon       03-05-2021     1.3 ... Corred IMU calibration
+# Andy Alarcon       03-04-2021     1.2 ... Added file input, output and calculations for KF
+# Andy Alarcon       03-05-2021     1.3 ... Corrected IMU calibration
+# Andy Alarcon       03-06-2021     1.4 ... Added an offset for periods of noise
 # -----------------------------------------------------------------------------
 
 import numpy.matlib as m
 import numpy as np
 import math
-import matplotlib.pyplot as plt 
 import random
 
 
@@ -24,19 +25,8 @@ def main():
     # Data set read from file
     KFReadings = ReadCommandsFileInput()
 
-    #testKF = KFReading(1, -1.9512e-65, 0, 0.001225,
-                      # 8.82147e-199, 2.96439e-322, -1.89933e-65, 0, 0, 0)
-
-    
     for i in range(len(KFReadings)):
         
-        # print("Iteration = " , i)
-        # print("Inital X State : ")
-        # print(KFReadings[i].matrix_initalX)
-
-        # print("Inital P State : ")
-        # print(KFReadings[i].matrix_initalP)
-
         # Calculate Xpred and Pred
         PredictionStage(KFReadings[i])
         # Calculate Kalaman Gain
@@ -50,8 +40,6 @@ def main():
         if i+1 < len(KFReadings) :
             KFReadings[i+1].matrix_initalX = KFReadings[i].matrix_CurrX
             KFReadings[i+1].matrix_initalP = KFReadings[i].matrix_CurrP
-
-        #print("-----------------------------------------------------------")
 
     
     print("Data Written to Output.txt")
@@ -73,15 +61,11 @@ def WriteDataToFile(KFreading):
     f.write(str(x[0][0]) + '|' + str(x[1][0]) + '|' + str(x[3][0]) + '\n')
     
     f.close() 
-
-    # x = np.asarray(KFreading.matrix_CurrX)
-    # print("Array :")
-    # print(str(x[0][0]) + '|' + str(x[1][0]) + '|' + str(x[3][0]) + '\n')
   
 
 # ----------------------------------------------------------------------------
 # FUNCTION NAME:     CorrectionStage()
-# PURPOSE:           This performs the correction stage
+# PURPOSE:           This function performs the correction stage
 # -----------------------------------------------------------------------------
 
 
@@ -98,8 +82,6 @@ def CorrectionStage(KFreading):
 
     #Calculate current state = Xkp + K[Z-Y]
     KFreading.matrix_CurrX = np.add(KFreading.matrix_PredX, rightS)
-    # print("New State : ")  
-    # print(KFreading.matrix_CurrX)
 
     #Update proccess matrix, KH = H * Pkp
     KH_mat = np.dot(KFreading.matrix_H, KFreading.matrix_PredP)
@@ -108,8 +90,6 @@ def CorrectionStage(KFreading):
 
     #Substract Pkp - K(H*Pkp)
     KFreading.matrix_CurrP = np.subtract(KFreading.matrix_PredP, KH_mat)
-    # print("New Proccess : ")  
-    # print(KFreading.matrix_CurrP)
 
 
 
@@ -126,28 +106,16 @@ def CalculateKalmanGain(KFreading):
 
     # Pkp*H^T*H
     denominator = np.dot(numerator, KFreading.matrix_H)
-#    print("Denominator Matrix : ")
-#    print(denominator)
-#    print("R Matrix : ")
-#    print(KFreading.matrix_R)
-#    print("Sum of the Denominator : ")
 
     #Pkp*H^T*H + R
     denominator = np.add(denominator, KFreading.matrix_R)
-    # print(denominator)
-
-#    print("inv denominator : ")
 
     #[Pkp*H^T*H + R]^-1
     inv_denominator = np.linalg.inv(denominator)
-#    print(inv_denominator)
-#    print("Numerator Matrix : ")
-#    print(numerator)
-#    print("Dot  : ")
 
     # K = Pkp*H^T   *   [Pkp*H^T*H + R]^-1
     k_mat = np.dot(numerator, inv_denominator)
-#    print(k_mat)
+
     KFreading.matrix_K = k_mat
 
 
@@ -159,28 +127,17 @@ def CalculateKalmanGain(KFreading):
 
 def PredictionStage(KFreading):
 
-    # Predict state
-    #    print("Matrix A : ")
-    #    print(KFreading.matrix_A)
-    #    print("Inital Matrix X : ")
-    #    print(KFreading.matrix_initalX)
+
     KFreading.matrix_PredX = np.dot(
         KFreading.matrix_A, KFreading.matrix_initalX)
-#    print("Matrix A x X : ")
-#    print(KFreading.matrix_PredX)
+
 
     # Predict proccess matrix
-#    print("Inital Matrix P : ")
-#    print(KFreading.matrix_initalP)
     leftS = np.dot(KFreading.matrix_A, KFreading.matrix_initalP)
     leftS = np.dot(leftS, KFreading.matrix_TransA)
-#    print("Left Matrix : ")
-#    print(leftS)
+
     KFreading.matrix_PredP = np.add(leftS, KFreading.matrix_QNoise)
-#    print("Noise Matrix : ")
-#    print(KFreading.matrix_QNoise)
-#    print("Prediction P matrix : ")
-#    print(KFreading.matrix_PredP)
+
 
 
 # ----------------------------------------------------------------------------
