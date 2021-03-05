@@ -26,12 +26,12 @@ def main():
     
     for i in range(len(KFReadings)):
         
-        print("Iteration = " , i)
-        print("Inital X State : ")
-        print(KFReadings[i].matrix_initalX)
+        # print("Iteration = " , i)
+        # print("Inital X State : ")
+        # print(KFReadings[i].matrix_initalX)
 
-        print("Inital P State : ")
-        print(KFReadings[i].matrix_initalP)
+        # print("Inital P State : ")
+        # print(KFReadings[i].matrix_initalP)
 
         # Calculate Xpred and Pred
         PredictionStage(KFReadings[i])
@@ -47,7 +47,7 @@ def main():
             KFReadings[i+1].matrix_initalX = KFReadings[i].matrix_CurrX
             KFReadings[i+1].matrix_initalP = KFReadings[i].matrix_CurrP
 
-        print("-----------------------------------------------------------")
+        #print("-----------------------------------------------------------")
 
 
 
@@ -73,6 +73,7 @@ def WriteDataToFile(KFreading):
     x = np.asarray(KFreading.matrix_CurrX)
     f = open("output.txt", "a+")
     f.write(str(x[0][0]) + '|' + str(x[1][0]) + '|' + str(x[3][0]) + '\n')
+    
     f.close() 
 
     # x = np.asarray(KFreading.matrix_CurrX)
@@ -99,8 +100,8 @@ def CorrectionStage(KFreading):
 
     #Calculate current state = Xkp + K[Z-Y]
     KFreading.matrix_CurrX = np.add(KFreading.matrix_PredX, rightS)
-    print("New State : ")  
-    print(KFreading.matrix_CurrX)
+    # print("New State : ")  
+    # print(KFreading.matrix_CurrX)
 
     #Update proccess matrix, KH = H * Pkp
     KH_mat = np.dot(KFreading.matrix_H, KFreading.matrix_PredP)
@@ -109,8 +110,8 @@ def CorrectionStage(KFreading):
 
     #Substract Pkp - K(H*Pkp)
     KFreading.matrix_CurrP = np.subtract(KFreading.matrix_PredP, KH_mat)
-    print("New Proccess : ")  
-    print(KFreading.matrix_CurrP)
+    # print("New Proccess : ")  
+    # print(KFreading.matrix_CurrP)
 
 
 
@@ -301,9 +302,11 @@ class KFReading:
         # --------------------------------------------------------------------------------------------
 
         # Sensor measurements
-        Z_mat = m.matrix([[self.gps_x], [self.gps_covY], [
+        Z_mat = m.matrix([[self.gps_x], [self.gps_y], [
                          self.velocity], [self.imu_o], [self.wvelocity]])
         self.matrix_Z = Z_mat
+
+    
 
 
 if __name__ == "__main__":
