@@ -18,20 +18,67 @@ import math
 def main():
 
     # Data set read from file
-    #KFReadings = ReadCommandsFileInput()
+    KFReadings = ReadCommandsFileInput()
 
-    testKF = KFReading(1, -1.9512e-65, 0, 0.001225,
-                       8.82147e-199, 2.96439e-322, -1.89933e-65, 0, 0, 0)
+    #testKF = KFReading(1, -1.9512e-65, 0, 0.001225,
+                      # 8.82147e-199, 2.96439e-322, -1.89933e-65, 0, 0, 0)
 
-    # Calculate Xpred and Pred
-    PredictionStage(testKF)
-    # Calculate Kalaman Gain
-    CalculateKalmanGain(testKF)
-    CorrectionStage(testKF)
+    
+    for i in range(len(KFReadings)):
+        
+        print("Iteration = " , i)
+        print("Inital X State : ")
+        print(KFReadings[i].matrix_initalX)
+
+        print("Inital P State : ")
+        print(KFReadings[i].matrix_initalP)
+
+        # Calculate Xpred and Pred
+        PredictionStage(KFReadings[i])
+        # Calculate Kalaman Gain
+        CalculateKalmanGain(KFReadings[i])
+        # Correction Stage
+        CorrectionStage(KFReadings[i])
+
+        WriteDataToFile(KFReadings[i])
+
+        #Set current to inital of next reading
+        if i+1 < len(KFReadings) :
+            KFReadings[i+1].matrix_initalX = KFReadings[i].matrix_CurrX
+            KFReadings[i+1].matrix_initalP = KFReadings[i].matrix_CurrP
+
+        print("-----------------------------------------------------------")
+
+
+
+
+	    
+
+    # # Calculate Xpred and Pred
+    # PredictionStage(testKF)
+    # # Calculate Kalaman Gain
+    # CalculateKalmanGain(testKF)
+    # CorrectionStage(testKF)
 
     #Setup next
 
-   
+ # ----------------------------------------------------------------------------
+# FUNCTION NAME:     WriteDataToFile()
+# PURPOSE:           writes
+# -----------------------------------------------------------------------------
+
+
+def WriteDataToFile(KFreading):
+
+    x = np.asarray(KFreading.matrix_CurrX)
+    f = open("output.txt", "a+")
+    f.write(str(x[0][0]) + '|' + str(x[1][0]) + '|' + str(x[3][0]) + '\n')
+    f.close() 
+
+    # x = np.asarray(KFreading.matrix_CurrX)
+    # print("Array :")
+    # print(str(x[0][0]) + '|' + str(x[1][0]) + '|' + str(x[3][0]) + '\n')
+  
 
 # ----------------------------------------------------------------------------
 # FUNCTION NAME:     CorrectionStage()
