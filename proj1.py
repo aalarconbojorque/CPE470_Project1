@@ -11,7 +11,8 @@
 # Andy Alarcon       03-03-2021     1.1 ... implemented KFreading class & additional matrices
 # Andy Alarcon       03-04-2021     1.2 ... Added file input, output and calculations for KF
 # Andy Alarcon       03-05-2021     1.3 ... Corrected IMU calibration
-# Andy Alarcon       03-06-2021     1.4 ... Added an offset for periods of noise
+# Andy Alarcon       03-06-2021     1.4 ... Added an offset calc for periods of noise
+# Andy Alarcon       03-08-2021     1.4 ... Adjusted comments
 # -----------------------------------------------------------------------------
 
 import numpy.matlib as m
@@ -25,6 +26,7 @@ def main():
     # Data set read from file
     KFReadings = ReadCommandsFileInput()
 
+    #For all KF readings
     for i in range(len(KFReadings)):
         
         # Calculate Xpred and Pred
@@ -33,24 +35,21 @@ def main():
         CalculateKalmanGain(KFReadings[i])
         # Correction Stage
         CorrectionStage(KFReadings[i])
-
+        #Write current KF results
         WriteDataToFile(KFReadings[i])
 
-        #Set current to inital of next reading
+        #Set current proccess and state martix to inital for the next KF reading
         if i+1 < len(KFReadings) :
             KFReadings[i+1].matrix_initalX = KFReadings[i].matrix_CurrX
             KFReadings[i+1].matrix_initalP = KFReadings[i].matrix_CurrP
 
     
-    print("Data Written to Output.txt")
-
-	    
-
+    print("Kalman Filter Data Written to Output.txt")
     
 
  # ----------------------------------------------------------------------------
 # FUNCTION NAME:     WriteDataToFile()
-# PURPOSE:           writes
+# PURPOSE:           writes the x, y, and orientation of the current KF reading
 # -----------------------------------------------------------------------------
 
 
@@ -95,7 +94,7 @@ def CorrectionStage(KFreading):
 
 # ----------------------------------------------------------------------------
 # FUNCTION NAME:     CalculateKalmanGain()
-# PURPOSE:           This performs calculate the Kalman gain
+# PURPOSE:           This performs calculates the Kalman gain
 # -----------------------------------------------------------------------------
 
 
@@ -142,8 +141,8 @@ def PredictionStage(KFreading):
 
 # ----------------------------------------------------------------------------
 # FUNCTION NAME:     ReadFileInput()
-# PURPOSE:           This function reads the data file input and returns a list of
-#                    the data at each time
+# PURPOSE:           This function reads the data file input and 
+#                    returns a list of the data at each time
 # -----------------------------------------------------------------------------
 
 
@@ -167,8 +166,11 @@ def ReadCommandsFileInput():
     return KFFileReadings
 
 
+#This class is created for every line of data
+#Represented as a single KF reading
 class KFReading:
     def __init__(self, time, odo_x, odo_y, odo_o, imu_o, imu_cov, gps_x, gps_y, gps_covX, gps_covY):
+       #Init variables
         self.time = time
         self.delta_time = 0.001
         self.odo_x = odo_x
@@ -181,7 +183,7 @@ class KFReading:
         self.gps_covX = gps_covX
         self.gps_covY = gps_covY
 
-        # additional matrices
+        #Init additional matrices
         self.matrix_PredX = np.identity(5)
         self.matrix_CurrX = np.identity(5)
         self.matrix_PredP = np.identity(5)
@@ -189,10 +191,9 @@ class KFReading:
         self.matrix_K = np.identity(5)
 
         # Predicted state equation
-        # ----------------------------------------------------------------------------------------------
+        # ---------------------------------------
+       
         # Create Matrix A
-        #cos_theta = np.around(np.cos(self.odo_o), decimals=5)
-        #sin_theta = np.around(np.sin(self.odo_o), decimals=5)
         cos_theta = np.cos(self.odo_o)
         sin_theta = np.sin(self.odo_o)
         A_mat = m.matrix([[1, 0, self.delta_time*cos_theta, 0, 0],
@@ -211,7 +212,7 @@ class KFReading:
         self.matrix_initalX = X_mat
 
         # Predicted proccess equation
-        # ----------------------------------------------------------------------------------------------
+        # ---------------------------------------
 
         # Create initial proccess noise covariance matrix
         QN_mat = m.matrix([[.00004, 0, 0, 0, 0],
@@ -233,20 +234,19 @@ class KFReading:
         self.matrix_initalP = PIN_mat
 
         # Kalman Gain equation
-        # --------------------------------------------------------------------------------------------
+        # ---------------------------------------
         self.matrix_H = np.identity(5)
         self.matrix_TransH = np.transpose(self.matrix_H)
         
-        print(random.uniform(0.001, 0.009))
-        
+        #For certain periods add noise (offset)
         if (self.time >= 500 and self.time <=2000) or (self.time >= 3000):
             offset = random.uniform(-2,2)
         else :
             offset = 0
 
         # Measurement Error covariance matrix R
-        R_mat = m.matrix([[self.gps_covX, 0, 0, 0, 0],
-                          [0, self.gps_covY, 0, 0, 0],
+        R_mat = m.matrix([[self.gps_covX+0.001, 0, 0, 0, 0],
+                          [0, self.gps_covY+0.002, 0, 0, 0],
                           [0, 0, .01, 0, 0],
                           [0, 0, 0, self.imu_cov, 0],
                           [0, 0, 0, 0, .01]])
@@ -261,7 +261,7 @@ class KFReading:
         self.matrix_initalR = IR_mat
 
         # Correction Stage
-        # --------------------------------------------------------------------------------------------
+        # ---------------------------------------
 
         # Sensor measurements
         Z_mat = m.matrix([[self.gps_x+offset], [self.gps_y+offset], [
